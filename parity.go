@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	//NONE paryty off
-	parNONE = iota
+	//ParNONE paryty off
+	ParNONE = iota
 	//PAR paryty
 	PAR
 	//ODD parity is ODD
@@ -29,7 +29,7 @@ func (t *Term) SetParity(parity int) error {
 		return err
 	}
 	switch parity {
-	case parNONE:
+	case ParNONE:
 		a.Cflag &^= syscall.PARENB
 		a.Cflag &^= cmspar
 	case PAR:
@@ -68,7 +68,7 @@ func (t *Term) GetParity() (int, error) {
 			return PAR, nil
 		}
 	} else {
-		return parNONE, nil
+		return ParNONE, nil
 	}
 }
 
