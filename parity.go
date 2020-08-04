@@ -14,7 +14,13 @@ const (
 	PAR
 	//ODD parity is ODD
 	ODD
+	//MARK parity is MARK
+	MARK
+	//SPACE parity is SPACE
+	SPACE
 )
+
+const cmspar uint64 = 0x40000000
 
 //SetParity - parity
 func (t *Term) SetParity(parity int) error {
@@ -25,12 +31,23 @@ func (t *Term) SetParity(parity int) error {
 	switch parity {
 	case parNONE:
 		a.Cflag &^= syscall.PARENB
+		a.Cflag &^= cmspar
 	case PAR:
+		a.Cflag &^= cmspar
 		a.Cflag |= syscall.PARENB
 		a.Cflag &^= syscall.PARODD
 	case ODD:
+		a.Cflag &^= cmspar
 		a.Cflag |= syscall.PARENB
 		a.Cflag |= syscall.PARODD
+	case MARK:
+		a.Cflag |= syscall.PARENB
+		a.Cflag |= syscall.PARODD
+		a.Cflag |= cmspar
+	case SPACE:
+		a.Cflag |= syscall.PARENB
+		a.Cflag |= cmspar
+		a.Cflag &^= syscall.PARODD
 	default:
 		return errors.New("Unknown parity option")
 	}
