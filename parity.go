@@ -20,7 +20,7 @@ const (
 	SPACE
 )
 
-const cmspar uint64 = 0x40000000
+const cmspar uint32 = 0x40000000
 
 //SetParity - parity
 func (t *Term) SetParity(parity int) error {
