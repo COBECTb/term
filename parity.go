@@ -10,14 +10,16 @@ import (
 const (
 	//ParNONE paryty off
 	ParNONE = iota
-	//PAR paryty
-	PAR
-	//ODD parity is ODD
-	ODD
-	//MARK parity is MARK
-	MARK
-	//SPACE parity is SPACE
-	SPACE
+	//ParPAR paryty
+	ParPAR
+	//ParODD parity is ODD
+	ParODD
+	//ParMARK parity is MARK
+	ParMARK
+	//ParSPACE parity is SPACE
+	ParSPACE
+	//ParIGN parity is ParIGN
+	ParIGN
 )
 
 const cmspar uint32 = 0x40000000
@@ -30,24 +32,35 @@ func (t *Term) SetParity(parity int) error {
 	}
 	switch parity {
 	case ParNONE:
+		a.Cflag &^= syscall.IGNPAR
 		a.Cflag &^= syscall.PARENB
+		a.Cflag &^= syscall.PARODD
 		a.Cflag &^= cmspar
-	case PAR:
+	case ParPAR:
+		a.Cflag &^= syscall.IGNPAR
 		a.Cflag &^= cmspar
 		a.Cflag |= syscall.PARENB
 		a.Cflag &^= syscall.PARODD
-	case ODD:
+	case ParODD:
+		a.Cflag &^= syscall.IGNPAR
 		a.Cflag &^= cmspar
 		a.Cflag |= syscall.PARENB
 		a.Cflag |= syscall.PARODD
-	case MARK:
+	case ParMARK:
+		a.Cflag &^= syscall.IGNPAR
 		a.Cflag |= syscall.PARENB
 		a.Cflag |= syscall.PARODD
 		a.Cflag |= cmspar
-	case SPACE:
+	case ParSPACE:
+		a.Cflag &^= syscall.IGNPAR
 		a.Cflag |= syscall.PARENB
 		a.Cflag |= cmspar
 		a.Cflag &^= syscall.PARODD
+	case ParIGN:
+		a.Cflag |= syscall.IGNPAR
+		a.Cflag &^= syscall.PARENB
+		a.Cflag &^= syscall.PARODD
+		a.Cflag &^= cmspar
 	default:
 		return errors.New("Unknown parity option")
 	}
@@ -63,9 +76,9 @@ func (t *Term) GetParity() (int, error) {
 
 	if a.Cflag&syscall.PARENB > 0 {
 		if a.Cflag&syscall.PARODD > 0 {
-			return ODD, nil
+			return ParODD, nil
 		} else {
-			return PAR, nil
+			return ParPAR, nil
 		}
 	} else {
 		return ParNONE, nil
