@@ -1,3 +1,3 @@
-module github.com/pkg/term
+module github.com/COBECTb/term
 
 go 1.13

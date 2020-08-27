@@ -7,11 +7,14 @@ import (
 	"github.com/pkg/term/termios"
 )
 
+//#define CMSPAR   010000000000
+//import "C"
+
 const (
 	//ParNONE paryty off
 	ParNONE = iota
-	//ParPAR paryty
-	ParPAR
+	//ParEVEN paryty
+	ParEVEN
 	//ParODD parity is ODD
 	ParODD
 	//ParMARK parity is MARK
@@ -22,7 +25,7 @@ const (
 	ParIGN
 )
 
-const cmspar uint32 = 0x40000000
+const CMSPAR uint64 = 0x40000000
 
 //SetParity - parity
 func (t *Term) SetParity(parity int) error {
@@ -35,34 +38,48 @@ func (t *Term) SetParity(parity int) error {
 		a.Cflag &^= syscall.IGNPAR
 		a.Cflag &^= syscall.PARENB
 		a.Cflag &^= syscall.PARODD
-		a.Cflag &^= cmspar
-	case ParPAR:
+		a.Cflag &^= CMSPAR
+	case ParEVEN:
 		a.Cflag &^= syscall.IGNPAR
-		a.Cflag &^= cmspar
+		a.Cflag &^= CMSPAR
 		a.Cflag |= syscall.PARENB
 		a.Cflag &^= syscall.PARODD
 	case ParODD:
 		a.Cflag &^= syscall.IGNPAR
-		a.Cflag &^= cmspar
+		a.Cflag &^= CMSPAR
 		a.Cflag |= syscall.PARENB
 		a.Cflag |= syscall.PARODD
 	case ParMARK:
 		a.Cflag &^= syscall.IGNPAR
 		a.Cflag |= syscall.PARENB
 		a.Cflag |= syscall.PARODD
-		a.Cflag |= cmspar
+		a.Cflag |= CMSPAR
 	case ParSPACE:
 		a.Cflag &^= syscall.IGNPAR
 		a.Cflag |= syscall.PARENB
-		a.Cflag |= cmspar
+		a.Cflag |= CMSPAR
 		a.Cflag &^= syscall.PARODD
 	case ParIGN:
 		a.Cflag |= syscall.IGNPAR
 		a.Cflag &^= syscall.PARENB
 		a.Cflag &^= syscall.PARODD
-		a.Cflag &^= cmspar
+		a.Cflag &^= CMSPAR
 	default:
 		return errors.New("Unknown parity option")
+	}
+	return termios.Tcsetattr(uintptr(t.fd), termios.TCSANOW, (*syscall.Termios)(&a))
+}
+
+//SetRecvParityCheckOn - parity
+func (t *Term) SetRecvParityCheckOn(onIgn bool) error {
+	var a attr
+	if err := termios.Tcgetattr(uintptr(t.fd), (*syscall.Termios)(&a)); err != nil {
+		return err
+	}
+	if onIgn {
+		a.Cflag |= syscall.IGNPAR
+	} else {
+		a.Cflag &^= syscall.IGNPAR
 	}
 	return termios.Tcsetattr(uintptr(t.fd), termios.TCSANOW, (*syscall.Termios)(&a))
 }
@@ -78,7 +95,7 @@ func (t *Term) GetParity() (int, error) {
 		if a.Cflag&syscall.PARODD > 0 {
 			return ParODD, nil
 		} else {
-			return ParPAR, nil
+			return ParEVEN, nil
 		}
 	} else {
 		return ParNONE, nil
