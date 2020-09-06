@@ -18,6 +18,8 @@ func ExampleTerm_SetDTR() {
 	t.SetDTR(false) // toggle DTR low
 	time.Sleep(250 * time.Millisecond)
 	t.SetDTR(true) // raise DTR, resets Ardunio
+	par, _ := t.GetParity()
+	t.SetParity(par)
 }
 
 // Send Break to the remote DTE.
